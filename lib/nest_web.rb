@@ -93,6 +93,13 @@ module NestWeb
       @structure_id = structure_id
     end
 
+    def devices
+      swarm_ids = object.fetch('value').fetch('swarm').select { |swarm_id| swarm_id =~ /\Atopaz/ }
+      swarm_ids.map do |swarm_id|
+        Device.new(session, swarm_id)
+      end
+    end
+
     def away_status
       away = object.fetch('value').fetch('away')
       away_setter = object.fetch('value').fetch('away_setter')
@@ -132,6 +139,8 @@ module NestWeb
         headers: session.headers.merge('Content-Type' => 'application/json'),
         expects: [200]
       })
+      data = JSON.parse(response.body)
+      object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
       object['value'].merge!(value)
     end
 
@@ -152,6 +161,69 @@ module NestWeb
     def object
       session.data.fetch('objects').find do |dataum|
         dataum['object_key'] == structure_id
+      end
+    end
+  end
+
+  class Device
+    attr_reader :session, :swarm_id
+
+    def initialize(session, swarm_id)
+      @session = session
+      @swarm_id = swarm_id
+    end
+
+    def co_alarm_state
+      co_status = object.fetch('value').fetch('co_status')
+      case co_status
+      when 0 then 'ok'
+      when 1 then 'warning'
+      when 2 then 'emergency'
+      else raise 'Unknown value.'
+      end
+    end
+
+    def set_co_alarm_state(new_co_alarm_state)
+      value = case new_co_alarm_state
+      when 'ok'
+        {'co_status' => 0}
+      when 'warning'
+        {'co_status' => 1}
+      when 'emergency'
+        {'co_status' => 2}
+      else
+        raise ArgumentError, 'Unknown value. Expected one of "ok", "warning" or "emergency"'
+      end
+      response = Excon.post("#{session.transport_url}/v5/put", {
+        body: JSON.dump({
+          objects: [{
+            base_object_revision: revision,
+            object_key: key,
+            op: 'MERGE',
+            value: value
+          }]
+        }),
+        headers: session.headers.merge('Content-Type' => 'application/json'),
+        expects: [200]
+      })
+      data = JSON.parse(response.body)
+      object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
+      object['value'].merge!(value)
+    end
+
+    def revision
+      object.fetch('object_revision')
+    end
+
+    def key
+      object.fetch('object_key')
+    end
+
+    private
+
+    def object
+      session.data.fetch('objects').find do |dataum|
+        dataum['object_key'] == swarm_id
       end
     end
   end
