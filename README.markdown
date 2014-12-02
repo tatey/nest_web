@@ -24,6 +24,7 @@ Change a structure's away status.
 ``` ruby
 session = NestWeb.login('you@email.com', 'secret')
 structure = session.structures.first
+structure.name # => "Office"
 structure.away_status # => "home"
 structure.set_away_status("away")
 structure.away_status # => "away"
@@ -35,6 +36,7 @@ Change a device's CO alarm state.
 session = NestWeb.login('you@email.com', 'secret')
 structure = session.structures.first
 device = structure.devices.first
+device.serial_number # => "D383A9343444444A"
 device.co_alarm_state # => "ok"
 device.set_co_alarm_state("warning")
 device.co_alarm_state # => "warning"
