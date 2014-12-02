@@ -3,6 +3,10 @@
 Programatically interact with your Nest developer accout using Ruby.
 Based on the Chrome Extension for Nest.
 
+Unfortunately you cannot set the CO or smoke alarm states using
+the public API. We use this to programatically test an app we built
+on top of Nest's public API.
+
 ## Install
 
 First, add this line to your application's Gemfile.
