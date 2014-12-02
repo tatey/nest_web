@@ -100,6 +100,10 @@ module NestWeb
       end
     end
 
+    def name
+      object.fetch('value').fetch('name')
+    end
+
     def away_status
       away = object.fetch('value').fetch('away')
       away_setter = object.fetch('value').fetch('away_setter')
