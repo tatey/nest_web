@@ -173,6 +173,10 @@ module NestWeb
       @swarm_id = swarm_id
     end
 
+    def serial_number
+      object.fetch('value').fetch('serial_number')
+    end
+
     def co_alarm_state
       co_status = object.fetch('value').fetch('co_status')
       case co_status
