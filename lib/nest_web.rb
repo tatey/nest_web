@@ -185,8 +185,8 @@ module NestWeb
       co_status = object.fetch('value').fetch('co_status')
       case co_status
       when 0 then 'ok'
-      when 1 then 'warning'
-      when 2 then 'emergency'
+      when 1, 2 then 'warning'
+      when 3 then 'emergency'
       else raise 'Unknown value.'
       end
     end
@@ -198,7 +198,7 @@ module NestWeb
       when 'warning'
         {'co_status' => 1}
       when 'emergency'
-        {'co_status' => 2}
+        {'co_status' => 3}
       else
         raise ArgumentError, 'Unknown value. Expected one of "ok", "warning" or "emergency"'
       end
