@@ -152,7 +152,7 @@ module NestWeb
         }),
         headers: session.headers.merge('Content-Type' => 'application/json')
       })
-      if respone.status == 200
+      if response.status == 200
         data = JSON.parse(response.body)
         object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
         object['value'].merge!(value)
