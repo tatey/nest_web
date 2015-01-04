@@ -10,19 +10,25 @@ module NestWeb
         'Content-Type' => 'application/json',
         'User-Agent' => self.user_agent,
         'X-Requested-With' => 'XMLHttpRequest'
-      },
-      expects: [201]
+      }
     })
-    data = JSON.parse(response.body)
-    session = Session.new(
-      token: data.fetch('access_token'),
-      user_id: data.fetch('userid'),
-      transport_url: data.fetch('urls').fetch('transport_url')
-    )
+    if response.status == 201
+      data = JSON.parse(response.body)
+      session = Session.new(
+        token: data.fetch('access_token'),
+        user_id: data.fetch('userid'),
+        transport_url: data.fetch('urls').fetch('transport_url')
+      )
+    else
+      raise Error, "Nest login failed. Got #{response.status}"
+    end
   end
 
   def self.user_agent
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36'
+  end
+
+  class Error < StandardError
   end
 
   class Session
@@ -50,7 +56,11 @@ module NestWeb
           query: {'_' => Time.now.to_i * 1000},
           headers: headers
         })
-        JSON.parse(response.body)
+        if response.status == 200
+          JSON.parse(response.body)
+        else
+          raise Error, "Nest data retrieve failed. Got #{response.status}"
+        end
       end
     end
 
@@ -140,12 +150,15 @@ module NestWeb
             value: value
           }]
         }),
-        headers: session.headers.merge('Content-Type' => 'application/json'),
-        expects: [200]
+        headers: session.headers.merge('Content-Type' => 'application/json')
       })
-      data = JSON.parse(response.body)
-      object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
-      object['value'].merge!(value)
+      if respone.status == 200
+        data = JSON.parse(response.body)
+        object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
+        object['value'].merge!(value)
+      else
+        raise Error, "Nest structure update failed. Got #{response.status}"
+      end
     end
 
     def away_timestamp
@@ -211,12 +224,15 @@ module NestWeb
             value: value
           }]
         }),
-        headers: session.headers.merge('Content-Type' => 'application/json'),
-        expects: [200]
+        headers: session.headers.merge('Content-Type' => 'application/json')
       })
-      data = JSON.parse(response.body)
-      object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
-      object['value'].merge!(value)
+      if response.status == 200
+        data = JSON.parse(response.body)
+        object['object_revision'] = data.fetch('objects').first.fetch('object_revision')
+        object['value'].merge!(value)
+      else
+        raise Error, "Nest device update failed. Got #{response.status}"
+      end
     end
 
     def revision

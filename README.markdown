@@ -45,3 +45,14 @@ device.co_alarm_state # => "ok"
 device.set_co_alarm_state("warning")
 device.co_alarm_state # => "warning"
 ```
+
+Exception handling.
+
+``` ruby
+begin
+  # ...
+  device.set_co_alarm_state("warning")
+rescue NestWeb::Error => error
+  puts error
+end
+```
