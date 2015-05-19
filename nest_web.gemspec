@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = 'nest_web'
   gem.require_paths = ['lib']
   gem.version       = NestWeb::VERSION
-  gem.add_dependency "excon", '~> 0.41.0'
+  gem.add_dependency "excon", '~> 0.45.3'
 
   gem.add_development_dependency 'pry'
 end
